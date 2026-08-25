@@ -1,0 +1,5 @@
+- hosts: switches
+  tasks:
+    - name: Print Facts
+      debug:
+        var: ansible_facts

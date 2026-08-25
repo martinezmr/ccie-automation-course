@@ -1,0 +1,13 @@
+---
+- hosts: eos
+  gather_facts: no
+  connection: network_cli
+  tasks:
+    - name: Get Facts
+      eos_facts:
+        gather_subset: all
+      register: eos_facts_output
+    
+    - name: Display Facts
+      debug:
+        var: eos_facts_output
