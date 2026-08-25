@@ -1,13 +1,22 @@
 ---
 - hosts: switches
+  gather_facts: no
+  become: true
   tasks:
     - name: Configure VLANs on Arista Switches
       arista.eos.eos_vlans:
         config:
-          vlan_id: "{{ item.vlan_id }}"
-          name: "{{ item.name }}"
-          state: active
-        loop:
-          - { vlan_id: 10, name: "VLAN10" }
-          - { vlan_id: 20, name: "VLAN20" }
+          - vlan_id: 10
+            name: "Printer"
+            state: active
+          - vlan_id: 20
+            name: "Camera"
+            state: active
+          - vlan_id: 30
+            name: "Guest"
+            state: active
         state: merged
+    
+    - name: Save Running to Start-up config
+      arista.eos.eos_config:
+        save_when: modified
