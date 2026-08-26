@@ -1,0 +1,74 @@
+- name: Print Facts for All Devices
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Display gathered facts
+      debug:
+        var: ansible_facts
+
+- name: Layer-2 Interfaces
+  hosts: switches
+  become: true
+  tasks:
+    - name: Configure Layer-2 Interfaces on Arista Switches
+      arista.eos.eos_l2_interfaces:
+        config:
+          - name: "Ethernet1"
+            access:
+              vlan: 10
+          - name: "Ethernet2"
+            access:
+              vlan: 20
+          # - name: "Ethernet3"
+          #   trunk:
+          #     allowed_vlans: "10,20"
+          #     encapsulation: dot1q
+        state: merged
+      register: l2_interfaces_config
+
+    - name: Set Ports as Access Ports
+      arista.eos.eos_interfaces:
+        config:
+          - name: "Ethernet1"
+            mode: access
+          - name: "Ethernet2"
+            mode: access
+          # - name: "Ethernet3"
+          #   mode: trunk
+        state: merged
+
+    - name: Display Layer-2 Interfaces Configuration Result
+      debug:
+        var: l2_interfaces_config
+    
+    - name: Save Running to Start-up config
+      arista.eos.eos_config:
+        save_when: modified
+
+- name: Layer-3 Interfaces
+  hosts: routers
+  become: true
+  tasks:
+    - name: Configure Layer-3 Interfaces on Arista Switches
+      arista.eos.eos_l3_interfaces:
+        config:
+          - ipv4:
+            - address: "10.10.10.11/30"
+            name: "Ethernet1"
+        state: merged
+      when: ansible_host == "172.17.0.3"
+
+- name: Enable All Interfaces
+  hosts: all
+  become: true
+  tasks:
+    - name: Enable All Interfaces on Arista Devices
+      arista.eos.eos_interfaces:
+        config:
+          - name: "{{ item }}"
+            enabled: true
+        state: merged
+      loop:
+        - "Ethernet1"
+        - "Ethernet2"
+        
