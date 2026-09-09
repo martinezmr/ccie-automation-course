@@ -1,9 +1,4 @@
-hubports = [
-    "Ethernet0/0",
-    "Ethernet0/1",
-    "Ethernet0/2",
-    "Ethernet0/3"
-]
+hubports = ["Ethernet0/0", "Ethernet0/1", "Ethernet0/2", "Ethernet0/3"]
 
 boot_message = """
 PyhtonHub is booting ...

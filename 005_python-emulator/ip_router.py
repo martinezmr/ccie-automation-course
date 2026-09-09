@@ -1,5 +1,6 @@
 import ipaddress
 
+
 class Router:
     RIB = []
     FIB = []
@@ -12,7 +13,7 @@ class Router:
         new_route = {
             "network": network,
             "prefix_length": prefix_length,
-            "next_hop": next_hop
+            "next_hop": next_hop,
         }
         self.RIB.append(new_route)
         self.calculate_fib()
@@ -23,8 +24,10 @@ class Router:
         self.FIB = []
         for route in self.RIB:
             new_fib_entry = {
-                "prefix": ipaddress.IPv4Network(f"{route['network']}/{route['prefix_length']}"),
-                "next_hop": ipaddress.IPv4Address(route["next_hop"])
+                "prefix": ipaddress.IPv4Network(
+                    f"{route['network']}/{route['prefix_length']}"
+                ),
+                "next_hop": ipaddress.IPv4Address(route["next_hop"]),
             }
             print(f"  ⚙️ Populating FIB entry: {new_fib_entry}")
             self.FIB.append(new_fib_entry)
@@ -39,7 +42,9 @@ Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
 """
         print(sh_ip_route_banner)
         for route in self.RIB:
-            print(f"S    {route['network']}/{route['prefix_length']} via {route['next_hop']}")
+            print(
+                f"S    {route['network']}/{route['prefix_length']} via {route['next_hop']}"
+            )
 
     def find_next_hop_address(self, dst_addr):
         addr_obj = ipaddress.IPv4Address(dst_addr)
@@ -50,7 +55,7 @@ Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
                 print(f"  🟡 Found candidate prefix: {fib_entry['prefix']}")
                 if not best_candidate:
                     best_candidate = fib_entry
-                elif fib_entry['prefix'].prefixlen > best_candidate['prefix'].prefixlen:
+                elif fib_entry["prefix"].prefixlen > best_candidate["prefix"].prefixlen:
                     best_candidate = fib_entry
         if best_candidate:
             print(f"  🟢 Longest prefix match for {dst_addr} is {best_candidate}")
@@ -65,6 +70,7 @@ Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
             print(f"  🟢 Forwarding to {next_hop_address}")
         else:
             print("  🔴 Dropping packet")
+
 
 if __name__ == "__main__":
 
