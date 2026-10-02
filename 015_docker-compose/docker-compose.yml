@@ -1,0 +1,36 @@
+services:
+  netbox:
+    image: netboxcommunity/netbox:latest
+    networks:
+      - ccnp_net
+    environment:
+      SECRET_KEY: 14b9ec4ce7f688449eccd4b6ba33ccd4af11915e82cad36a026c77a18e55d19e
+      DB_HOST: postgres
+      DB_USER: netbox
+      DB_PASSWORD: netbox
+      REDIS_CACHE_HOST: redis1
+      REDIS_HOST: redis2
+    ports:
+      - "80:8080"
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: netbox
+    networks:
+      - ccnp_net
+  redis1:
+    image: redis:latest
+    networks:
+      - ccnp_net
+  redis2:
+    image: redis:latest
+    networks:
+      - ccnp_net
+
+networks:
+  ccnp_net:
+    ipam:
+      config:
+        - subnet: 172.16.0.0/16
+          gateway: 172.16.0.1

@@ -1,0 +1,12 @@
+testbed:
+  credentials:
+    default:
+      username: admin
+      password: admin
+    devices:
+      bos-acc-01:
+        os: eos
+        connections:
+          vty:
+            protocol: ssh
+            ip: 172.17.0.2

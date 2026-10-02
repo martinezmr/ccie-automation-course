@@ -21,4 +21,6 @@ webex_payload = {
 
 response = requests.post(url=url, headers=webex_headers, json=webex_payload)
 
-print(f"Received HTTP status code: {response.status_code} / {response.reason} / {response.text}")
+print(
+    f"Received HTTP status code: {response.status_code} / {response.reason} / {response.text}"
+)
