@@ -1,0 +1,225 @@
+- name: Populate NetBox
+  connection: local
+  hosts: localhost
+  gather_facts: false
+
+  module_defaults:
+    group/netbox.netbox.netbox:
+      netbox_url: "{{ lookup('env', 'NETBOX_API', default='http://0.0.0.0:8000') }}"
+      netbox_token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
+
+  vars:
+    mgmt:
+      - device: ios-router-1
+        mgmt_interface: Ethernet0/0
+        mgmt_address: 10.3.19.101/24
+      - device: ios-router-2
+        mgmt_interface: Ethernet0/0
+        mgmt_address: 10.3.19.102/24
+      - device: ios-switch-1
+        mgmt_interface: Ethernet0/0
+        mgmt_address: 10.3.19.103/24
+      - device: ios-switch-2
+        mgmt_interface: Ethernet0/0
+        mgmt_address: 10.3.19.104/24
+      - device: iosxe-router-1
+        mgmt_interface: GigabitEthernet1
+        mgmt_address: 10.3.19.105/24
+      - device: iosxe-router-2
+        mgmt_interface: GigabitEthernet1
+        mgmt_address: 10.3.19.106/24
+      - device: iosxe-switch-1
+        mgmt_interface: GigabitEthernet0/0
+        mgmt_address: 10.3.19.107/24
+      - device: iosxe-switch-2
+        mgmt_interface: GigabitEthernet0/0
+        mgmt_address: 10.3.19.108/24
+
+  tasks:
+    - name: Sites
+      netbox.netbox.netbox_site:
+        data:
+          name: "{{ item }}"
+      loop:
+        - Site A
+        - Site B
+
+    - name: Network device roles
+      netbox.netbox.netbox_device_role:
+        data:
+          name: "{{ item }}"
+      loop:
+        - Router
+        - Switch
+
+    - name: Create Cisco manufacturer
+      netbox.netbox.netbox_manufacturer:
+        data:
+          name: Cisco
+
+    - name: Create IOS platform
+      netbox.netbox.netbox_platform:
+        data:
+          name: IOS
+
+    - name: Create virtual device types
+      netbox.netbox.netbox_device_type:
+        data:
+          model: "{{ item }}"
+          manufacturer: Cisco
+          default_platform: IOS
+      loop:
+        - IOL
+        - IOL-L2
+        - Catalyst 8000v
+        - Catalyst 9000v
+
+    - name: IOL interface templates
+      netbox.netbox.netbox_device_interface_template:
+        data:
+          device_type: IOL
+          type: 100base-tx
+          name: "{{ item }}"
+      loop:
+        - Ethernet0/0
+        - Ethernet0/1
+        - Ethernet0/2
+        - Ethernet0/3
+
+    - name: IOL-L2 interface templates
+      netbox.netbox.netbox_device_interface_template:
+        data:
+          device_type: IOL-L2
+          type: 100base-tx
+          name: "{{ item }}"
+      loop:
+        - Ethernet0/0
+        - Ethernet0/1
+        - Ethernet0/2
+        - Ethernet0/3
+
+    - name: Catalyst 8000v interface templates
+      netbox.netbox.netbox_device_interface_template:
+        data:
+          device_type: Catalyst 8000v
+          type: 1000base-t
+          name: "{{ item }}"
+      loop:
+        - GigabitEthernet1
+        - GigabitEthernet2
+        - GigabitEthernet3
+        - GigabitEthernet4
+
+    - name: Catalyst 9000v interface templates
+      netbox.netbox.netbox_device_interface_template:
+        data:
+          device_type: Catalyst 9000v
+          type: 1000base-t
+          name: "{{ item }}"
+      loop:
+        - GigabitEthernet0/0
+        - GigabitEthernet1/0/1
+        - GigabitEthernet1/0/2
+        - GigabitEthernet1/0/3
+        - GigabitEthernet1/0/4
+        - GigabitEthernet1/0/5
+        - GigabitEthernet1/0/6
+        - GigabitEthernet1/0/7
+        - GigabitEthernet1/0/8
+        - GigabitEthernet1/0/9
+        - GigabitEthernet1/0/10
+        - GigabitEthernet1/0/11
+        - GigabitEthernet1/0/12
+        - GigabitEthernet1/0/13
+        - GigabitEthernet1/0/14
+        - GigabitEthernet1/0/15
+        - GigabitEthernet1/0/16
+        - GigabitEthernet1/0/17
+        - GigabitEthernet1/0/18
+        - GigabitEthernet1/0/19
+        - GigabitEthernet1/0/20
+        - GigabitEthernet1/0/21
+        - GigabitEthernet1/0/22
+        - GigabitEthernet1/0/23
+        - GigabitEthernet1/0/24
+
+    - name: Site A routers
+      netbox.netbox.netbox_device:
+        data:
+          name: "{{ item }}"
+          site: Site A
+          device_type: IOL
+          device_role: Router
+      loop:
+        - ios-router-1
+        - ios-router-2
+
+    - name: Site A switches
+      netbox.netbox.netbox_device:
+        data:
+          name: "{{ item }}"
+          site: Site A
+          device_type: IOL-L2
+          device_role: Switch
+      loop:
+        - ios-switch-1
+        - ios-switch-2
+
+    - name: Site B routers
+      netbox.netbox.netbox_device:
+        data:
+          name: "{{ item }}"
+          site: Site B
+          device_type: Catalyst 8000v
+          device_role: Router
+      loop:
+        - iosxe-router-1
+        - iosxe-router-2
+
+    - name: Site B switches
+      netbox.netbox.netbox_device:
+        data:
+          name: "{{ item }}"
+          site: Site B
+          device_type: Catalyst 9000v
+          device_role: Switch
+      loop:
+        - iosxe-switch-1
+        - iosxe-switch-2
+
+    - name: Management IP addresses
+      netbox.netbox.netbox_ip_address:
+        data:
+          address: "{{ item.mgmt_address }}"
+          assigned_object:
+            device: "{{ item.device }}"
+            name: "{{ item.mgmt_interface }}"
+      loop: "{{ mgmt }}"
+
+    - name: Device primary IP addresses
+      netbox.netbox.netbox_device:
+        data:
+          name: "{{ item.device }}"
+          primary_ip4: "{{ item.mgmt_address }}"
+      loop: "{{ mgmt }}"
+
+    - name: Other interface IP addresses
+      netbox.netbox.netbox_ip_address:
+        data:
+          address: "{{ item.address }}"
+          assigned_object:
+            device: "{{ item.device }}"
+            name: "{{ item.interface }}"
+      loop:
+        - device: ios-router-1
+          interface: Ethernet0/1
+          address: 192.168.1.1/24
+        - device: ios-router-2
+          interface: Ethernet0/1
+          address: 192.168.1.2/24
+        - device: iosxe-router-1
+          interface: GigabitEthernet2
+          address: 192.168.2.1/24
+        - device: iosxe-router-2
+          interface: GigabitEthernet2
+          address: 192.168.2.2/24
